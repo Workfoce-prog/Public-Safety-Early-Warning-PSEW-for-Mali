@@ -1,0 +1,87 @@
+{
+  "generated": "2025-08-25 21:34",
+  "artifacts": [
+    {
+      "path": "streamlit/psew_streamlit_v3_trilingual_rag_actions.zip",
+      "title": "Trilingual (EN/FR/BM) + Mobile + RAG Actions",
+      "tags": [
+        "demo",
+        "ops"
+      ],
+      "note": "Best for live demos with actionable table."
+    },
+    {
+      "path": "streamlit/psew_streamlit_v3_trilingual.zip",
+      "title": "Trilingual (EN/FR/BM) + Mobile",
+      "tags": [
+        "demo"
+      ],
+      "note": "General trilingual demo."
+    },
+    {
+      "path": "streamlit/psew_streamlit_v3.zip",
+      "title": "FR + Bambara + Mobile",
+      "tags": [
+        "demo"
+      ],
+      "note": "French/Bambara only demo."
+    },
+    {
+      "path": "streamlit/psew_streamlit_v2.zip",
+      "title": "Oversight + SOPs + Extra Layers",
+      "tags": [
+        "oversight",
+        "config"
+      ],
+      "note": "Governance review, config upload/download, zones/corridors/assets."
+    },
+    {
+      "path": "streamlit/psew_streamlit.zip",
+      "title": "Original Prototype",
+      "tags": [
+        "archive"
+      ],
+      "note": "Earliest lightweight prototype."
+    },
+    {
+      "path": "deploy/psew_streamlit_deploy.zip",
+      "title": "Docker + Compose Scaffold",
+      "tags": [
+        "deploy"
+      ],
+      "note": "Containerize the app for IT."
+    },
+    {
+      "path": "onepagers/PSEW_Leadership_OnePager_trilingual.html",
+      "title": "One\u2011Pager (EN/FR/BM)",
+      "tags": [
+        "brief"
+      ],
+      "note": "Trilingual leadership brief (HTML)."
+    },
+    {
+      "path": "onepagers/PSEW_Leadership_OnePager_multi.html",
+      "title": "One\u2011Pager (FR/BM)",
+      "tags": [
+        "brief"
+      ],
+      "note": "Bilingual leadership brief (HTML)."
+    },
+    {
+      "path": "onepagers/PSEW_Leadership_OnePager.html",
+      "title": "One\u2011Pager (EN)",
+      "tags": [
+        "brief"
+      ],
+      "note": "English one\u2011pager (HTML)."
+    },
+    {
+      "path": "web_demo/psew_dashboard.html",
+      "title": "Standalone Web Demo",
+      "tags": [
+        "web"
+      ],
+      "note": "No server required; for quick visual explainers."
+    }
+  ]
+}

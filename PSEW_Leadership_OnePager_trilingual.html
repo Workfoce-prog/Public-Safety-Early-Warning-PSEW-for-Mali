@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PSEW — Trilingual One‑Pager</title>
+<style>
+  :root{--ink:#0f172a;--muted:#475569}
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:24px;line-height:1.45;color:var(--ink);}
+  header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  h1{font-size:22px;margin:0}
+  .lang select{padding:6px 10px;border-radius:8px;border:1px solid #e5e7eb}
+  @media (max-width:600px){ body{margin:12px} h1{font-size:18px} }
+  .tag{display:inline-block;background:#e2e8f0;color:#0f172a;padding:3px 8px;border-radius:999px;font-size:12px;margin-right:6px}
+  h2{font-size:16px;margin:18px 0 8px;border-bottom:1px solid #e5e7eb;padding-bottom:4px}
+  ul{margin:6px 0 10px 18px}
+  .foot{margin-top:14px;font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+  <header>
+    <h1 id="title">PSEW — Public‑Safety Early‑Warning</h1>
+    <div class="lang">
+      <label for="sel">Language / Langue / Kan:</label>
+      <select id="sel">
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+        <option value="bm">Bamanankan</option>
+      </select>
+    </div>
+  </header>
+  <div><span class="tag">Prototype</span><span class="tag">Simulated data</span><span class="tag">Human‑in‑the‑loop</span></div>
+
+  <h2 id="purpose_h">Purpose</h2>
+  <p id="purpose_p">Provide early‑warning visibility of public‑safety risks via multi‑sensor fusion, with cautious thresholds and non‑lethal playbooks.</p>
+
+  <h2 id="does_h">What it does</h2>
+  <ul id="does_ul">
+    <li>Fuses anonymized signals into a per‑site risk score.</li>
+    <li>Uses hysteresis to stabilize alerts.</li>
+    <li>Requires multi‑sensor confirmation and human authorization for RED.</li>
+    <li>Tracks KPIs (Pd, Pfa, Continuity) and keeps an audit log.</li>
+    <li>Map layers for sites, zones, corridors, assets.</li>
+  </ul>
+
+  <h2 id="rag_h">RAG & Playbooks</h2>
+  <ul id="rag_ul">
+    <li>GREEN: Routine monitoring</li>
+    <li>AMBER: Verify with a second sensor; communications</li>
+    <li>RED: Confirm multi‑source; notify; perimeter; medical; human authorization</li>
+  </ul>
+
+  <h2 id="success_h">Success Criteria</h2>
+  <ul id="success_ul">
+    <li>Pd ≥ 90% with controlled Pfa</li>
+    <li>&lt;10 min to acknowledge RED</li>
+    <li>No confirmed harm from false positives</li>
+  </ul>
+
+  <h2 id="demo_h">Demo Notes</h2>
+  <ul id="demo_ul">
+    <li>Simulated data; no PII.</li>
+    <li>Thresholds/weights configurable (UI or config.json).</li>
+    <li>Audit CSV and oversight packet (JSON) exportable.</li>
+  </ul>
+
+  <p class="foot" id="gen_ts">Generated: 2025-08-25 21:21</p>
+
+<script>
+const T = {
+  en: {
+    title: "PSEW — Public‑Safety Early‑Warning",
+    purpose_h: "Purpose",
+    purpose_p: "Provide early‑warning visibility of public‑safety risks via multi‑sensor fusion, with cautious thresholds and non‑lethal playbooks.",
+    does_h: "What it does",
+    does_ul: [
+      "Fuses anonymized signals into a per‑site risk score.",
+      "Uses hysteresis to stabilize alerts.",
+      "Requires multi‑sensor confirmation and human authorization for RED.",
+      "Tracks KPIs (Pd, Pfa, Continuity) and keeps an audit log.",
+      "Map layers for sites, zones, corridors, assets."
+    ],
+    rag_h: "RAG & Playbooks",
+    rag_ul: [
+      "GREEN: Routine monitoring",
+      "AMBER: Verify with a second sensor; communications",
+      "RED: Confirm multi‑source; notify; perimeter; medical; human authorization"
+    ],
+    success_h: "Success Criteria",
+    success_ul: [
+      "Pd ≥ 90% with controlled Pfa",
+      "<10 min to acknowledge RED",
+      "No confirmed harm from false positives"
+    ],
+    demo_h: "Demo Notes",
+    demo_ul: [
+      "Simulated data; no PII.",
+      "Thresholds/weights configurable (UI or config.json).",
+      "Audit CSV and oversight packet (JSON) exportable."
+    ],
+    gen_prefix: "Generated: "
+  },
+  fr: {
+    title: "PSEW — Alerte Précoce (Sécurité Publique)",
+    purpose_h: "Objectif",
+    purpose_p: "Fournir une vision d’alerte précoce des risques de sécurité publique via une fusion multi‑capteurs, avec seuils prudents et carnets d’actions non‑létaux.",
+    does_h: "Fonctions",
+    does_ul: [
+      "Fusion anonymisée des signaux et score de risque par site.",
+      "Hystérésis pour stabiliser les alertes.",
+      "Confirmation multi‑capteurs et autorisation humaine pour ROUGE.",
+      "KPIs (Pd, Pfa, Continuité) et journal d’audit.",
+      "Carte avec sites, zones, corridors, actifs."
+    ],
+    rag_h: "États RAG & Actions",
+    rag_ul: [
+      "VERT: Surveillance de routine",
+      "AMBRE: Vérifier un second capteur; communication",
+      "ROUGE: Confirmer multi‑source; notifier; périmètre; médical; autorisation humaine"
+    ],
+    success_h: "Critères de succès",
+    success_ul: [
+      "Pd ≥ 90% avec Pfa contrôlé",
+      "<10 min pour accusé de réception ROUGE",
+      "Pas de dommage confirmé lié aux faux positifs"
+    ],
+    demo_h: "Notes de démo",
+    demo_ul: [
+      "Données simulées; pas de PII.",
+      "Seuils/poids configurables (UI ou config.json).",
+      "Export CSV d’audit et paquet de gouvernance JSON."
+    ],
+    gen_prefix: "Généré: "
+  },
+  bm: {
+    title: "PSEW — Sigiyɔrɔ kan minɛ (Sènèkɛya)",
+    purpose_h: "Jatigiya",
+    purpose_p: "Sɔrɔbaga bɛ na ko min bɛ taa kɛ sigiyɔrɔ kan: sensoru bɛɛ dɔw ka fɔ, sɛliw dɔrɔnya, ni kɛlɛfanga min tɛ na (non‑létal).",
+    does_h: "Baara min bɛ kɛ",
+    does_ul: [
+      "Sensoru dɔw ka fɔ ni siti kɔrɔ risku baara.",
+      "Hystérésis bɛ ka alertu dɔrɔn.",
+      "Sensoru bɛɛ ka fɔ ka ROUGE; mɔgɔ ka fɔlɔ kɔfɛ.",
+      "KPI (Pd, Pfa, Continuity) ni ka diya ko (audit).",
+      "Karta: siti, zonu, kɔridoru, fɛnw tigɛ."
+    ],
+    rag_h: "RAG ni kɛlɛfanga",
+    rag_ul: [
+      "WƐRƐ (VERT): Sigi ka ɲɛ.",
+      "AMBRE: Sensoru min fana ka di; kɔrɔbɔ kɛ.",
+      "DYE (ROUGE): Sensoru bɛɛ ka di; mɔgɔ fɔ; saro kɛ; dogotorɔw bɛɛ; mɔgɔ ka fɔlɔ." 
+    ],
+    success_h: "Dabɔlenw",
+    success_ul: [
+      "Pd ≥ 90% ni Pfa dɔrɔnya",
+      "<10 min ROUGE ka ɲininkali",
+      "Dɔ nyɛna tɛ b’a ɲɛ ka fɔlɔ kɔfɛ"
+    ],
+    demo_h: "Demo ko",
+    demo_ul: [
+      "Doni dɔrɔ (simule); PII tɛ la.",
+      "Sɛliw/pondérasion bɛ se ka sɛbɛ (UI walima config.json).",
+      "Audit CSV ni gouvernansu JSON bɛ se ka bila."
+    ],
+    gen_prefix: "Ka segin: "
+  }
+};
+
+function setLang(lang){
+  const L=T[lang];
+  document.getElementById('title').textContent=L.title;
+  ['purpose_h','does_h','rag_h','success_h','demo_h'].forEach(id=>{
+    document.getElementById(id).textContent=L[id];
+  });
+  document.getElementById('purpose_p').textContent=L.purpose_p;
+  function setList(id, arr){
+    const ul=document.getElementById(id);
+    ul.innerHTML='';
+    arr.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; ul.appendChild(li); });
+  }
+  setList('does_ul', L.does_ul);
+  setList('rag_ul', L.rag_ul);
+  setList('success_ul', L.success_ul);
+  setList('demo_ul', L.demo_ul);
+  const ts=document.getElementById('gen_ts').textContent.split(':').slice(-1)[0].trim();
+  document.getElementById('gen_ts').textContent= L.gen_prefix + ts;
+}
+
+const sel=document.getElementById('sel');
+sel.addEventListener('change', (e)=> setLang(e.target.value));
+setLang('en');
+</script>
+</body>
+</html>

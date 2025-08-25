@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PSEW — Bundle Chooser</title>
+<style>
+  :root{--ink:#0f172a;--muted:#475569;--bg:#0ea5e910}
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:24px;color:var(--ink);}
+  header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+  h1{font-size:24px;margin:0}
+  .lang select{padding:6px 10px;border-radius:8px;border:1px solid #e5e7eb}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:10px}
+  .card{border:1px solid #e5e7eb;border-radius:14px;padding:14px;background:#fff}
+  .title{font-weight:700;margin-bottom:6px}
+  .tags span{display:inline-block;font-size:11px;background:var(--bg);padding:2px 8px;border-radius:999px;margin-right:6px;margin-bottom:6px}
+  .note{color:var(--muted);font-size:13px;margin-top:6px;min-height:36px}
+  a.btn{display:inline-block;margin-top:8px;padding:8px 10px;border:1px solid #0ea5e9;color:#0ea5e9;border-radius:8px;text-decoration:none}
+  footer{margin-top:18px;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="t_title">PSEW — Bundle Chooser</h1>
+  <div class="lang">
+    <label for="sel">Language / Langue / Kan:</label>
+    <select id="sel">
+      <option value="en">English</option>
+      <option value="fr">Français</option>
+      <option value="bm">Bamanankan</option>
+    </select>
+  </div>
+</header>
+
+<p id="t_blurb">Pick the build that matches your use case. Download zips or open briefs.</p>
+
+<div class="grid" id="cards"></div>
+
+<footer id="t_footer">Generated: 2025-08-25 21:34. Extract the full bundle and open this page locally for the buttons to work.</footer>
+
+<script>
+const DATA = {"generated": "2025-08-25 21:34", "artifacts": [{"path": "streamlit/psew_streamlit_v3_trilingual_rag_actions.zip", "title": "Trilingual (EN/FR/BM) + Mobile + RAG Actions", "tags": ["demo", "ops"], "note": "Best for live demos with actionable table."}, {"path": "streamlit/psew_streamlit_v3_trilingual.zip", "title": "Trilingual (EN/FR/BM) + Mobile", "tags": ["demo"], "note": "General trilingual demo."}, {"path": "streamlit/psew_streamlit_v3.zip", "title": "FR + Bambara + Mobile", "tags": ["demo"], "note": "French/Bambara only demo."}, {"path": "streamlit/psew_streamlit_v2.zip", "title": "Oversight + SOPs + Extra Layers", "tags": ["oversight", "config"], "note": "Governance review, config upload/download, zones/corridors/assets."}, {"path": "streamlit/psew_streamlit.zip", "title": "Original Prototype", "tags": ["archive"], "note": "Earliest lightweight prototype."}, {"path": "deploy/psew_streamlit_deploy.zip", "title": "Docker + Compose Scaffold", "tags": ["deploy"], "note": "Containerize the app for IT."}, {"path": "onepagers/PSEW_Leadership_OnePager_trilingual.html", "title": "One\u2011Pager (EN/FR/BM)", "tags": ["brief"], "note": "Trilingual leadership brief (HTML)."}, {"path": "onepagers/PSEW_Leadership_OnePager_multi.html", "title": "One\u2011Pager (FR/BM)", "tags": ["brief"], "note": "Bilingual leadership brief (HTML)."}, {"path": "onepagers/PSEW_Leadership_OnePager.html", "title": "One\u2011Pager (EN)", "tags": ["brief"], "note": "English one\u2011pager (HTML)."}, {"path": "web_demo/psew_dashboard.html", "title": "Standalone Web Demo", "tags": ["web"], "note": "No server required; for quick visual explainers."}]};
+
+const I18N = {
+  en: {
+    title: "PSEW — Bundle Chooser",
+    blurb: "Pick the build that matches your use case. Download zips or open briefs.",
+    footer: "Generated: 2025-08-25 21:34. Extract the full bundle and open this page locally for the buttons to work.",
+    tags: { demo:"Demo", ops:"Ops", oversight:"Oversight", config:"Config", deploy:"Deploy", brief:"Brief", web:"Web", archive:"Archive" },
+    open: "Open",
+    download: "Download"
+  },
+  fr: {
+    title: "PSEW — Sélecteur de Paquet",
+    blurb: "Choisissez le build adapté à votre usage. Téléchargez les zips ou ouvrez les fiches.",
+    footer: "Généré: 2025-08-25 21:34. Extrayez l’archive complète et ouvrez cette page en local pour activer les boutons.",
+    tags: { demo:"Démo", ops:"Ops", oversight:"Gouvernance", config:"Config", deploy:"Déploiement", brief:"Fiche", web:"Web", archive:"Archive" },
+    open: "Ouvrir",
+    download: "Télécharger"
+  },
+  bm: {
+    title: "PSEW — Sɛbɛnni kelen na  (Chooser)",
+    blurb: "I bɛ bɔ bɛɛ min b’a fɛ nyɛ. Zipu dɔw ka sɔrɔ walima fichew ka bɔ.",
+    footer: "Ka segin: 2025-08-25 21:34. Ka zip fɛ ka ɲɛ, ka sɔrɔ k’a ɲɛ ka ɲini filenan.",
+    tags: { demo:"Demo", ops:"Ops", oversight:"Gouvernansu", config:"Konfigurasion", deploy:"Deploy", brief:"Fiche", web:"Web", archive:"Arsiv" },
+    open: "Ka bɔ",
+    download: "Ka sɔrɔ"
+  }
+};
+
+function tagLabel(lang, key){
+  return (I18N[lang].tags[key]||key);
+}
+
+function render(lang='en'){
+  document.getElementById('t_title').textContent = I18N[lang].title;
+  document.getElementById('t_blurb').textContent = I18N[lang].blurb;
+  document.getElementById('t_footer').textContent = I18N[lang].footer;
+  const cards = document.getElementById('cards');
+  cards.innerHTML = '';
+  DATA.artifacts.forEach(it=>{
+    const card = document.createElement('div'); card.className='card';
+    const title = document.createElement('div'); title.className='title'; title.textContent = it.title;
+    const tags = document.createElement('div'); tags.className='tags';
+    it.tags.forEach(k=>{ const s=document.createElement('span'); s.textContent=tagLabel(lang,k); tags.appendChild(s); });
+    const note = document.createElement('div'); note.className='note'; note.textContent = it.note;
+    const btn = document.createElement('a');
+    const isHtml = it.path.endsWith('.html');
+    btn.textContent = isHtml ? I18N[lang].open : I18N[lang].download;
+    btn.href = it.path;
+    btn.className='btn';
+    card.appendChild(title); card.appendChild(tags); card.appendChild(note); card.appendChild(btn);
+    cards.appendChild(card);
+  });
+}
+
+const sel = document.getElementById('sel');
+sel.addEventListener('change', (e)=> render(e.target.value));
+render('en');
+</script>
+</body>
+</html>
