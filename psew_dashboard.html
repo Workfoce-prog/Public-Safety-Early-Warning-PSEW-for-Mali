@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Mali Public‑Safety Early‑Warning (PSEW) — Prototype Dashboard</title>
+<link rel="preconnect" href="https://unpkg.com">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --green:#16a34a; --amber:#f59e0b; --red:#dc2626; --dark:#0f172a; --light:#f8fafc;
+    --card:#ffffff; --muted:#64748b;
+  }
+  * { box-sizing:border-box; }
+  body {
+    margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+    background:linear-gradient(180deg,#f6f7fb 0%,#eef1f6 100%);
+    color:#0f172a;
+  }
+  header {
+    padding:16px 20px;
+    background:#0f172a; color:#fff; display:flex; gap:16px; align-items:center; flex-wrap:wrap;
+  }
+  header h1 { font-size:20px; margin:0; font-weight:700; }
+  header .tag { padding:4px 10px; border-radius:999px; background:#0ea5e9; color:#001019; font-size:12px; font-weight:700; }
+  .container { display:grid; grid-template-columns: 320px 1fr; gap:16px; padding:16px; }
+  .card { background:var(--card); border-radius:16px; box-shadow:0 10px 30px rgba(2,6,23,.08); overflow:hidden; }
+  .panel { padding:16px; }
+  .section-title { font-size:14px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin:0 0 8px 0; }
+  .control { margin-bottom:12px; }
+  .control label { display:block; font-size:13px; color:#334155; margin-bottom:6px; }
+  .row { display:flex; gap:10px; align-items:center; }
+  input[type="range"] { width:100%; }
+  .switch { position:relative; display:inline-block; width:42px; height:24px; }
+  .switch input { display:none; }
+  .slider { position:absolute; cursor:pointer; inset:0; background:#cbd5e1; transition:.2s; border-radius:999px; }
+  .slider:before { content:""; position:absolute; height:18px; width:18px; left:3px; top:3px; background:white; transition:.2s; border-radius:50%; box-shadow:0 1px 2px rgba(0,0,0,.2); }
+  input:checked + .slider { background:#22c55e; }
+  input:checked + .slider:before { transform:translateX(18px); }
+  #map { height:520px; width:100%; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .legend { display:flex; gap:8px; align-items:center; font-size:13px; color:#334155; }
+  .dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
+  .dot.green { background:var(--green); } .dot.amber { background:var(--amber); } .dot.red { background:var(--red); }
+  table { width:100%; border-collapse:separate; border-spacing:0; }
+  th,td { text-align:left; font-size:13px; padding:10px 12px; border-bottom:1px solid #e5e7eb; vertical-align:top;}
+  th { background:#f8fafc; color:#0f172a; position:sticky; top:0; z-index:1; }
+  .audit { max-height:280px; overflow:auto; }
+  .badge { padding:2px 8px; border-radius:999px; font-weight:700; font-size:12px; color:#fff; }
+  .badge.green{ background:var(--green);} .badge.amber{ background:var(--amber);} .badge.red{ background:var(--red);}
+  .kbd { font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background:#e2e8f0;
+         border-radius:6px; padding:2px 6px; font-size:12px; color:#0f172a;}
+  .footer { padding:10px 16px; font-size:12px; color:#475569; display:flex; justify-content:space-between; align-items:center;}
+  .btn { background:#0ea5e9; color:white; border:0; border-radius:10px; padding:8px 12px; font-weight:700; cursor:pointer; }
+  .btn.secondary { background:#334155; }
+  .pill { background:#e2e8f0; padding:4px 8px; border-radius:999px; font-size:12px; color:#0f172a; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Mali Public‑Safety Early‑Warning (PSEW) — Prototype Dashboard</h1>
+  <span class="tag">Simulated • No real data</span>
+  <span class="pill">Multi‑sensor fusion • RAG + Hysteresis • Ethics/Audit</span>
+</header>
+
+<div class="container">
+  <!-- Sidebar -->
+  <div class="card panel" id="sidebar">
+    <h3 class="section-title">Controls</h3>
+    <div class="control">
+      <label>Hysteresis thresholds (σ)</label>
+      <div class="row">
+        <span class="kbd">High</span><input type="range" id="thetaHigh" min="1.5" max="4.0" step="0.1" value="2.5">
+        <span id="thetaHighVal" class="kbd">2.5</span>
+      </div>
+      <div class="row" style="margin-top:8px;">
+        <span class="kbd">Low</span><input type="range" id="thetaLow" min="0.5" max="3.0" step="0.1" value="1.5">
+        <span id="thetaLowVal" class="kbd">1.5</span>
+      </div>
+    </div>
+
+    <div class="control">
+      <label>Sensor weights</label>
+      <div class="row"><span class="kbd">Radar</span><input type="range" id="wRadar" min="0" max="0.6" step="0.05" value="0.35"><span id="wRadarVal" class="kbd">0.35</span></div>
+      <div class="row"><span class="kbd">RF</span><input type="range" id="wRF" min="0" max="0.6" step="0.05" value="0.25"><span id="wRFVal" class="kbd">0.25</span></div>
+      <div class="row"><span class="kbd">Traffic</span><input type="range" id="wTraffic" min="0" max="0.6" step="0.05" value="0.20"><span id="wTrafficVal" class="kbd">0.20</span></div>
+      <div class="row"><span class="kbd">Acoustic</span><input type="range" id="wAcoustic" min="0" max="0.6" step="0.05" value="0.20"><span id="wAcousticVal" class="kbd">0.20</span></div>
+    </div>
+
+    <div class="control">
+      <label>Ethics & Safety Controls</label>
+      <div class="row">
+        <label class="switch">
+          <input type="checkbox" id="requireMulti" checked>
+          <span class="slider"></span>
+        </label>
+        <span>Require multi‑sensor confirmation for RED</span>
+      </div>
+      <div class="row">
+        <label class="switch">
+          <input type="checkbox" id="requireHuman" checked>
+          <span class="slider"></span>
+        </label>
+        <span>Require human authorization to escalate</span>
+      </div>
+      <div class="row">
+        <label class="switch">
+          <input type="checkbox" id="dataMin" checked>
+          <span class="slider"></span>
+        </label>
+        <span>Data minimization (aggregate signals only)</span>
+      </div>
+    </div>
+
+    <div class="control">
+      <label>Simulation</label>
+      <div class="row" style="gap:8px;">
+        <button class="btn" id="toggleSim">Pause</button>
+        <button class="btn secondary" id="injectEvent">Inject Incident Spike</button>
+      </div>
+      <small style="color:#64748b; display:block; margin-top:6px;">Simulation updates every second. “Inject Incident” adds short spikes to random sites.</small>
+    </div>
+
+    <div class="legend" style="margin-top:8px;">
+      <span class="dot green"></span> Green
+      <span class="dot amber"></span> Amber
+      <span class="dot red"></span> Red
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div style="display:flex; flex-direction:column; gap:16px;">
+    <div class="card">
+      <div id="map"></div>
+      <div class="footer">
+        <div>Sites shown: Bamako, Gao, Timbuktu, Mopti, Kidal • Colored by current RAG state (with hysteresis)</div>
+        <div><button class="btn" id="exportCsv">Export Audit CSV</button></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card panel">
+        <h3 class="section-title">Quality Metrics (rolling)</h3>
+        <canvas id="pdChart" height="160"></canvas>
+        <div style="height:12px"></div>
+        <canvas id="pfaChart" height="160"></canvas>
+      </div>
+      <div class="card panel">
+        <h3 class="section-title">Continuity & Thresholds</h3>
+        <canvas id="contChart" height="160"></canvas>
+        <div style="height:12px"></div>
+        <div id="playbook" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px;">
+          <div class="section-title" style="margin:0;">Playbook (auto‑suggested, non‑lethal)</div>
+          <div id="playbookBody" style="font-size:14px; color:#0f172a;">
+            No active alerts. Routine monitoring.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card panel">
+      <h3 class="section-title">Ethics & Audit Log</h3>
+      <div class="audit">
+        <table id="auditTable">
+          <thead>
+            <tr>
+              <th style="width:140px;">Timestamp</th>
+              <th>Site</th>
+              <th>Change</th>
+              <th>Sensors</th>
+              <th>Action</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="footer">
+        <div>Human‑in‑the‑loop enforced • Alerts logged with justification • No PII collected</div>
+        <div class="pill">Prototype for stakeholder review</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// --- Map setup ---
+const map = L.map('map').setView([17.5, -3.5], 5);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 18,
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+// --- Sites (dummy) ---
+const SITES = [
+  {id:'BKO', name:'Bamako',     lat:12.6392, lon:-8.0029, pop:2.8},
+  {id:'GAO', name:'Gao',        lat:16.2717, lon:-0.0447, pop:0.1},
+  {id:'TOM', name:'Timbuktu',   lat:16.7666, lon:-3.0026, pop:0.05},
+  {id:'MOP', name:'Mopti',      lat:14.4843, lon:-4.1829, pop:0.13},
+  {id:'KID', name:'Kidal',      lat:18.4411, lon:1.4073,  pop:0.03},
+];
+
+function ragColor(rag) {
+  if (rag === 'RED') return '#dc2626';
+  if (rag === 'AMBER') return '#f59e0b';
+  return '#16a34a';
+}
+
+function badgeHtml(rag) {
+  const cls = rag === 'RED' ? 'red' : rag === 'AMBER' ? 'amber' : 'green';
+  return `<span class="badge ${cls}">${rag}</span>`;
+}
+
+// --- State per site ---
+const state = {};
+const markers = {};
+
+SITES.forEach(s => {
+  state[s.id] = {
+    R: 0.3, // latent risk score
+    latchedRed: false,
+    lastRAG: 'GREEN',
+    // simple sensor baselines
+    noiseRadar: 1.0, noiseRF: 1.0, noiseTraffic: 1.0, noiseAcoustic: 1.0,
+    // truth incident flag
+    incident: false,
+    // continuity counters
+    updates: 0, scans: 0
+  };
+  const m = L.circleMarker([s.lat, s.lon], {
+    radius: 10, color: ragColor('GREEN'), fillColor: ragColor('GREEN'), fillOpacity: 0.9, weight:2
+  }).addTo(map).bindPopup(`${s.name} — <b><span id="pp-${s.id}">GREEN</span></b>`);
+  markers[s.id] = m;
+});
+
+// --- Controls ---
+const thetaHighEl = document.getElementById('thetaHigh');
+const thetaLowEl  = document.getElementById('thetaLow');
+const thetaHighVal = document.getElementById('thetaHighVal');
+const thetaLowVal  = document.getElementById('thetaLowVal');
+
+const wRadarEl = document.getElementById('wRadar');
+const wRFEl = document.getElementById('wRF');
+const wTrafficEl = document.getElementById('wTraffic');
+const wAcousticEl = document.getElementById('wAcoustic');
+
+const wRadarVal = document.getElementById('wRadarVal');
+const wRFVal = document.getElementById('wRFVal');
+const wTrafficVal = document.getElementById('wTrafficVal');
+const wAcousticVal = document.getElementById('wAcousticVal');
+
+const requireMulti = document.getElementById('requireMulti');
+const requireHuman = document.getElementById('requireHuman');
+const dataMin = document.getElementById('dataMin');
+
+thetaHighEl.addEventListener('input', () => thetaHighVal.textContent = Number(thetaHighEl.value).toFixed(1));
+thetaLowEl.addEventListener('input',  () => thetaLowVal.textContent  = Number(thetaLowEl.value).toFixed(1));
+[wRadarEl, wRFEl, wTrafficEl, wAcousticEl].forEach(el => {
+  el.addEventListener('input', () => {
+    wRadarVal.textContent = Number(wRadarEl.value).toFixed(2);
+    wRFVal.textContent = Number(wRFEl.value).toFixed(2);
+    wTrafficVal.textContent = Number(wTrafficEl.value).toFixed(2);
+    wAcousticVal.textContent = Number(wAcousticEl.value).toFixed(2);
+  });
+});
+
+// --- Charts ---
+const pdCtx = document.getElementById('pdChart');
+const pfaCtx = document.getElementById('pfaChart');
+const contCtx = document.getElementById('contChart');
+
+function mkChart(ctx, label, color) {
+  return new Chart(ctx, {
+    type: 'line',
+    data: { labels: [], datasets: [{ label, data: [], tension: 0.2, borderColor: color, fill:false }] },
+    options: {
+      animation:false,
+      scales: {
+        x: { ticks: { display:false } },
+        y: { min:0, max:1, ticks: { callback:v=>v.toFixed(1) } }
+      },
+      plugins: { legend: { display:false } }
+    }
+  });
+}
+
+const pdChart = mkChart(pdCtx, 'Pd', '#16a34a');
+const pfaChart = mkChart(pfaCtx, 'Pfa', '#dc2626');
+const contChart = mkChart(contCtx, 'Continuity', '#0ea5e9');
+
+function pushChart(chart, val) {
+  const labels = chart.data.labels;
+  const data = chart.data.datasets[0].data;
+  labels.push('');
+  data.push(val);
+  if (labels.length > 120) { labels.shift(); data.shift(); }
+  chart.update();
+}
+
+// --- Audit log ---
+const auditBody = document.querySelector('#auditTable tbody');
+const playbookBody = document.getElementById('playbookBody');
+const actionsFor = (rag) => {
+  if (rag === 'RED') return 'Verify with second sensor; notify liaison; road perimeter + medical standby; require human authorization before any escalation.';
+  if (rag === 'AMBER') return 'Elevate awareness; cross-check with another sensor; community messaging if relevant.';
+  return 'Routine monitoring.';
+};
+function logAudit(siteName, change, sensors, rag, status='Logged') {
+  const tr = document.createElement('tr');
+  const ts = new Date().toLocaleString();
+  tr.innerHTML = `
+    <td>${ts}</td>
+    <td>${siteName}</td>
+    <td>${badgeHtml(rag)} ${change}</td>
+    <td>${sensors}</td>
+    <td>${actionsFor(rag)}</td>
+    <td>${status}</td>
+  `;
+  auditBody.prepend(tr);
+  playbookBody.textContent = actionsFor(rag);
+}
+
+// Export CSV
+document.getElementById('exportCsv').addEventListener('click', () => {
+  let csv = "timestamp,site,change,rag,sensors,action,status\n";
+  document.querySelectorAll('#auditTable tbody tr').forEach(tr => {
+    const tds = tr.querySelectorAll('td');
+    const row = [tds[0].innerText, tds[1].innerText, tds[2].innerText.replace(/[\n\r,]/g,' '),
+      (tds[2].innerText.includes('RED')?'RED':tds[2].innerText.includes('AMBER')?'AMBER':'GREEN'),
+      tds[3].innerText.replace(/[\n\r,]/g,' '), tds[4].innerText.replace(/[\n\r,]/g,' '), tds[5].innerText];
+    csv += row.map(v => `"${v}"`).join(",") + "\n";
+  });
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'psew_audit_log.csv'; a.click();
+  URL.revokeObjectURL(url);
+});
+
+// --- Simulation ---
+let running = true;
+document.getElementById('toggleSim').addEventListener('click', () => {
+  running = !running;
+  document.getElementById('toggleSim').textContent = running ? 'Pause' : 'Resume';
+});
+
+// Inject incident button
+document.getElementById('injectEvent').addEventListener('click', () => {
+  const s = SITES[Math.floor(Math.random()*SITES.length)];
+  state[s.id].incident = true;
+  setTimeout(() => { state[s.id].incident = false; }, 8000);
+});
+
+const NORM = () => (Math.random()*2-1) * 0.7; // rough normal-like
+function clamp(x,a,b){ return Math.max(a, Math.min(b,x)); }
+
+let truthEvents = 0, detectedEvents = 0, falseAlarms = 0, emptyCells = 0;
+
+function tick() {
+  const th = Number(thetaHighEl.value);
+  const tl = Number(thetaLowEl.value);
+  const wRadar = Number(wRadarEl.value);
+  const wRF = Number(wRFEl.value);
+  const wTraffic = Number(wTrafficEl.value);
+  const wAcoustic = Number(wAcousticEl.value);
+
+  // Randomly trigger ground-truth incidents with small probability
+  if (Math.random() < 0.08) { // ~8% per second somewhere
+    const s = SITES[Math.floor(Math.random()*SITES.length)];
+    state[s.id].incident = true;
+    setTimeout(() => { state[s.id].incident = false; }, 10000);
+  }
+
+  SITES.forEach(s => {
+    const st = state[s.id];
+    // sensor anomalies (base noise + occasional spikes if incident)
+    let rad = 0.2 + NORM();
+    let rf =  0.2 + NORM();
+    let traf =0.2 + NORM();
+    let ac =  0.2 + NORM();
+
+    if (st.incident) {
+      rad += 2.0 + Math.random()*0.8;
+      rf  += 1.6 + Math.random()*0.8;
+      ac  += 1.4 + Math.random()*0.6;
+      // traffic may dip or spike depending on scenario; simulate spike
+      traf+= 1.2 + Math.random()*0.6;
+    }
+
+    // CFAR-like normalization to keep false alarms bounded
+    const alpha = 1.0; // could be adaptive; keep simple here
+    const normRad = rad / st.noiseRadar;
+    const normRF  = rf  / st.noiseRF;
+    const normTraf= traf/ st.noiseTraffic;
+    const normAc  = ac  / st.noiseAcoustic;
+
+    // Update noise baselines slowly (EWMA)
+    const lam = 0.05;
+    st.noiseRadar    = (1-lam)*st.noiseRadar    + lam*Math.max(0.6, rad);
+    st.noiseRF       = (1-lam)*st.noiseRF       + lam*Math.max(0.6, rf);
+    st.noiseTraffic  = (1-lam)*st.noiseTraffic  + lam*Math.max(0.6, traf);
+    st.noiseAcoustic = (1-lam)*st.noiseAcoustic + lam*Math.max(0.6, ac);
+
+    // Risk aggregation with data minimization (no PII)
+    let benign = 0.2 + 0.3*Math.random(); // benign evidence
+    const Rnext = (1-0.15)*st.R + 0.15 * (
+        wRadar*normRad + wRF*normRF + wTraffic*normTraf + wAcoustic*normAc - 0.6*benign
+    );
+    st.R = clamp(Rnext, 0, 6);
+
+    // Determine RAG with hysteresis + policy constraints
+    // Sensor confirmations
+    const channelsAbove = [normRad, normRF, normTraf, normAc].filter(v => v >= 1.5).length;
+    const requireMultiOk = !requireMulti.checked || channelsAbove >= 2;
+
+    // RAG transitions
+    let rag = 'GREEN';
+    if (st.latchedRed) {
+      if (st.R < tl) { st.latchedRed = false; rag = (st.R >= tl ? 'AMBER': 'GREEN'); }
+      else { rag = 'RED'; }
+    } else {
+      if (st.R >= th && requireMultiOk) {
+        rag = 'RED'; st.latchedRed = true;
+      } else if (st.R >= tl) { rag = 'AMBER'; }
+      else { rag = 'GREEN'; }
+    }
+
+    // Ground truth accounting
+    st.scans += 1;
+    if (rag !== 'GREEN') st.updates += 1;
+
+    // Pd/Pfa bookkeeping
+    if (st.incident) {
+      truthEvents += 1;
+      if (rag === 'RED') detectedEvents += 1;
+    } else {
+      emptyCells += 1;
+      if (rag === 'RED') falseAlarms += 1;
+    }
+
+    // Marker update + popup
+    if (rag !== st.lastRAG) {
+      const sensorsTxt = `radar:${normRad.toFixed(2)}, rf:${normRF.toFixed(2)}, traffic:${normTraf.toFixed(2)}, acoustic:${normAc.toFixed(2)}`;
+      let status = 'Logged';
+      if (rag === 'RED' && requireHuman.checked) status = 'Awaiting human authorization';
+      logAudit(s.name, `${st.lastRAG} → ${rag}`, sensorsTxt, rag, status);
+      st.lastRAG = rag;
+    }
+    markers[s.id].setStyle({ color: ragColor(rag), fillColor: ragColor(rag) });
+    const pp = document.getElementById(`pp-${s.id}`);
+    if (pp) pp.textContent = rag;
+  });
+
+  // Charts
+  const Pd = truthEvents > 0 ? detectedEvents / truthEvents : 1.0;
+  const Pfa = emptyCells > 0 ? falseAlarms / emptyCells : 0.0;
+  // Continuity: mean update ratio across sites
+  const cont = SITES.map(s => {
+    const st = state[s.id];
+    return st.scans > 0 ? st.updates / st.scans : 0;
+  }).reduce((a,b)=>a+b,0) / SITES.length;
+
+  pushChart(pdChart, clamp(Pd,0,1));
+  pushChart(pfaChart, clamp(Pfa*10,0,1)); // scale for visualization (rare reds)
+  pushChart(contChart, clamp(cont,0,1));
+}
+
+let timer = setInterval(()=> { if (running) tick(); }, 1000);
+</script>
+</body>
+</html>

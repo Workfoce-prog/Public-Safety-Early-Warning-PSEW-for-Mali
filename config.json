@@ -1,0 +1,170 @@
+{
+  "thresholds": {
+    "theta_high": 2.5,
+    "theta_low": 1.5
+  },
+  "weights": {
+    "radar": 0.35,
+    "rf": 0.25,
+    "traffic": 0.2,
+    "acoustic": 0.2
+  },
+  "ethics": {
+    "require_multi_confirm": true,
+    "require_human_auth": true,
+    "data_minimization": true
+  },
+  "decision": {
+    "confirm_level": 1.5,
+    "min_channels_for_red": 2
+  },
+  "normalization": {
+    "ewma_lambda": 0.05
+  },
+  "simulation": {
+    "incident_prob_per_tick": 0.08,
+    "incident_duration_s": 10.0
+  },
+  "sites": [
+    {
+      "id": "BKO",
+      "name": "Bamako",
+      "lat": 12.6392,
+      "lon": -8.0029,
+      "pop": 2.8,
+      "zone_radius_km": 25
+    },
+    {
+      "id": "GAO",
+      "name": "Gao",
+      "lat": 16.2717,
+      "lon": -0.0447,
+      "pop": 0.1,
+      "zone_radius_km": 20
+    },
+    {
+      "id": "TOM",
+      "name": "Timbuktu",
+      "lat": 16.7666,
+      "lon": -3.0026,
+      "pop": 0.05,
+      "zone_radius_km": 20
+    },
+    {
+      "id": "MOP",
+      "name": "Mopti",
+      "lat": 14.4843,
+      "lon": -4.1829,
+      "pop": 0.13,
+      "zone_radius_km": 18
+    },
+    {
+      "id": "KID",
+      "name": "Kidal",
+      "lat": 18.4411,
+      "lon": 1.4073,
+      "pop": 0.03,
+      "zone_radius_km": 18
+    },
+    {
+      "id": "KAY",
+      "name": "Kayes",
+      "lat": 14.4469,
+      "lon": -11.4445,
+      "pop": 0.2,
+      "zone_radius_km": 18
+    },
+    {
+      "id": "SEG",
+      "name": "Segou",
+      "lat": 13.44,
+      "lon": -6.26,
+      "pop": 0.2,
+      "zone_radius_km": 18
+    },
+    {
+      "id": "SIK",
+      "name": "Sikasso",
+      "lat": 11.3167,
+      "lon": -5.6667,
+      "pop": 0.2,
+      "zone_radius_km": 18
+    }
+  ],
+  "corridors": [
+    {
+      "name": "Bamako\u2013Segou",
+      "path": [
+        [
+          -8.0029,
+          12.6392
+        ],
+        [
+          -6.26,
+          13.44
+        ]
+      ]
+    },
+    {
+      "name": "Segou\u2013Mopti",
+      "path": [
+        [
+          -6.26,
+          13.44
+        ],
+        [
+          -4.1829,
+          14.4843
+        ]
+      ]
+    },
+    {
+      "name": "Gao\u2013Kidal",
+      "path": [
+        [
+          -0.0447,
+          16.2717
+        ],
+        [
+          1.4073,
+          18.4411
+        ]
+      ]
+    },
+    {
+      "name": "Timbuktu\u2013Gao",
+      "path": [
+        [
+          -3.0026,
+          16.7666
+        ],
+        [
+          -0.0447,
+          16.2717
+        ]
+      ]
+    }
+  ],
+  "assets": [
+    {
+      "name": "A\u00e9roport \u2014 Bamako",
+      "lat": 12.5335,
+      "lon": -7.9499
+    },
+    {
+      "name": "Pont \u2014 Mopti",
+      "lat": 14.4975,
+      "lon": -4.198
+    },
+    {
+      "name": "Poste \u00e9lectrique \u2014 S\u00e9gou",
+      "lat": 13.445,
+      "lon": -6.263
+    },
+    {
+      "name": "H\u00f4pital \u2014 Gao",
+      "lat": 16.262,
+      "lon": -0.045
+    }
+  ]
+}
